@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 // ==========================================
-// [CTO CONFIG] 상수 관리
+// [CTO CONFIG] 상수 및 목업 데이터 관리
 // ==========================================
 const TEMPLATES = [
   { id: 1, title: '팀 회식', icon: <Coffee className="w-4 h-4 text-pink-500" />, bgColor: 'bg-[#FFD6E0]' },
@@ -16,8 +16,34 @@ const TEMPLATES = [
 ];
 
 const MAX_ROOT_NODES = 7;
-const MAX_DEPTH = 2; // 🔥 CTO 결단: 인지 과부하를 막기 위해 2단계로 축소
+const MAX_DEPTH = 2; 
 const MAX_CHILDREN = 3;
+
+// 🔥 [실행 모드] 절대 지워지지 않는 초기 목업(Mock) 데이터 정의
+const INITIAL_MOCK_DATA = [
+  {
+    id: 10001,
+    title: "🔥 2026 하반기 팀 워크샵 장소 정하기 (테스트)",
+    status: "진행중",
+    dDay: "D-2",
+    voters: 8,
+    options: [
+      { id: '1', text: '제주도', voteCount: 0 },
+      { id: '2', text: '강릉/속초', voteCount: 0 }
+    ]
+  },
+  {
+    id: 10002,
+    title: "✨ 신규 서비스 로고 시안 투표 (테스트)",
+    status: "투표 대기",
+    dDay: "D-5",
+    voters: 0,
+    options: [
+      { id: '1', text: 'A안 (모던)', voteCount: 0 },
+      { id: '2', text: 'B안 (클래식)', voteCount: 0 }
+    ]
+  }
+];
 
 // ==========================================
 // [COMPONENTS] UI 공통 부품
@@ -54,7 +80,6 @@ const BottomNav = ({ view, setView, showToast }) => (
 // [VIEWS] 화면별 모듈
 // ==========================================
 
-// 1. HOME VIEW
 const HomeView = ({ setView, showToast, decisions }) => {
   const [imgError, setImgError] = useState(false);
 
@@ -150,7 +175,6 @@ const HomeView = ({ setView, showToast, decisions }) => {
   );
 };
 
-// 2. CREATE VIEW
 const CreateView = ({ setView, onPublish }) => {
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -216,8 +240,6 @@ const CreateView = ({ setView, onPublish }) => {
                     <div className="flex gap-2 items-center">
                       {depth > 1 && <div style={{ width: `${(depth - 1) * 16}px` }} className="flex justify-end shrink-0"><CornerDownRight className="w-4 h-4 text-gray-300"/></div>}
                       <span className="font-black text-gray-400 text-[13px] shrink-0 min-w-[20px]">{opt.id}</span>
-                      
-                      {/* 🔥 옵션 인풋창 내부에 글자수 카운터 삽입 */}
                       <div className="flex-1 relative flex items-center">
                         <input 
                           type="text" 
@@ -231,7 +253,6 @@ const CreateView = ({ setView, onPublish }) => {
                           {opt.text.length}/20
                         </span>
                       </div>
-
                       {depth < MAX_DEPTH && (
                         <button onClick={()=>addOption(opt.id)} className={`px-2.5 py-2 rounded-lg text-[10px] font-black whitespace-nowrap shrink-0 transition-all ${childCount >= MAX_CHILDREN ? 'text-gray-300 bg-gray-50' : 'text-[#E8668A] bg-pink-50'}`}>
                           {childCount >= MAX_CHILDREN ? '최대' : '+ 하위'}
@@ -278,7 +299,6 @@ const CreateView = ({ setView, onPublish }) => {
   );
 };
 
-// 3. SUCCESS VIEW
 const SuccessView = ({ setView }) => (
   <main className="flex-1 px-8 flex flex-col items-center justify-center text-center pb-24">
     <div className="w-24 h-24 bg-green-50 rounded-[40px] flex items-center justify-center mb-8 animate-bounce"><CheckCircle2 className="w-14 h-14 text-green-400" /></div>
@@ -301,7 +321,21 @@ const SuccessView = ({ setView }) => (
 export default function App() {
   const [view, setView] = useState('home');
   const [toast, setToast] = useState(null);
-  const [decisions, setDecisions] = useState([]);
+  
+  // 🔥 [실행 모드] 데이터 초기화 로직 변경 (로컬 스토리지 데이터 + 목업 데이터 병합 또는 초기값 세팅)
+  const [decisions, setDecisions] = useState(() => {
+    const savedData = localStorage.getItem('decisionFlow_decisions');
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 만약 로컬스토리지에 데이터가 비어있으면 강제로 목업 데이터 삽입
+      if (parsed.length > 0) return parsed;
+    }
+    return INITIAL_MOCK_DATA;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('decisionFlow_decisions', JSON.stringify(decisions));
+  }, [decisions]);
 
   const showToast = (msg) => {
     setToast(msg);
