@@ -470,13 +470,14 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [selectedDecisionId, setSelectedDecisionId] = useState(null);
   
+  // 🔥 미니 프리뷰 액자 격리 버그 해결: 완전히 새로운 이름표(v99)를 부여하여 액자 속 구버전 캐시를 원천 차단합니다.
   const [decisions, setDecisions] = useState(() => {
-    const saved = localStorage.getItem('decisionFlow_decisions');
+    const saved = localStorage.getItem('decisionFlow_force_reset_v99');
     return (saved && JSON.parse(saved).length > 0) ? JSON.parse(saved) : INITIAL_MOCK_DATA;
   });
 
   useEffect(() => {
-    localStorage.setItem('decisionFlow_decisions', JSON.stringify(decisions));
+    localStorage.setItem('decisionFlow_force_reset_v99', JSON.stringify(decisions));
   }, [decisions]);
 
   const showToast = (msg) => {
