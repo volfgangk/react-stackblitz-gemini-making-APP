@@ -6,8 +6,12 @@ import {
 } from 'lucide-react';
 
 // ==========================================
-// [CTO CONFIG] 상수 및 목업 데이터
+// [CTO CONFIG] 5-2-2 명칭 및 제약 조건 설정
 // ==========================================
+const MAX_ROOT_NODES = 5;       // 최상위 노드 (부모 노드) 최대 5개
+const MAX_CHILD_PER_NODE = 2;    // 하위/차하위 노드 (자식 노드) 최대 2개
+const MAX_DEPTH = 3;            // 최대 3뎁스 (부모 -> 자식 1뎁스 -> 자식 2뎁스)
+
 const TEMPLATES = [
   { id: 1, title: '팀 회식', icon: <Coffee className="w-4 h-4 text-pink-500" />, bgColor: 'bg-[#FFD6E0]' },
   { id: 2, title: '프로젝트명', icon: <Zap className="w-4 h-4 text-orange-500" />, bgColor: 'bg-[#FFE4B5]' },
@@ -15,34 +19,22 @@ const TEMPLATES = [
   { id: 4, title: '회의 개선', icon: <Users className="w-4 h-4 text-pink-500" />, bgColor: 'bg-[#FFD6E0]' },
 ];
 
-const MAX_ROOT_NODES = 7;
-const MAX_DEPTH = 2; 
-
 const INITIAL_MOCK_DATA = [
   {
     id: 10001,
-    title: "🔥 2026 하반기 팀 워크샵 장소 정하기 (테스트)",
+    title: "🔥 2026 하반기 팀 워크샵 장소 정하기 (테스트 안건1)",
     status: "진행중",
     dDay: "D-2",
     voters: 8,
     options: [
       { id: '1', text: '제주도 (푸른 바다와 맛있는 해산물이 가득한 섬)', voteCount: 5 },
       { id: '1-1', text: '함덕 해변 근처 (에메랄드빛 바다를 보며 힐링할 수 있는 최고의 장소입니다)', voteCount: 2 },
-      { id: '1-2', text: '서귀포 숲속 산장', voteCount: 3 },
+      { id: '1-1-1', text: '서우봉 둘레길 오후 산책 코스 탐방', voteCount: 1 },
+      { id: '1-1-2', text: '해변 앞 유명 카페 델문도 단체 방문', voteCount: 1 },
+      { id: '1-2', text: '서귀포 숲속 산장 (조용하고 깊은 대화 가능)', voteCount: 3 },
       { id: '2', text: '강릉/속초 (시원한 파도와 커피 거리가 있는 동해안의 보석)', voteCount: 3 },
-      { id: '2-1', text: '안목해변 커피거리', voteCount: 1 },
-      { id: '2-2', text: '설악산 근처 조용한 산장 (팀원들과 깊은 대화를 나누기에 적합합니다)', voteCount: 2 }
-    ]
-  },
-  {
-    id: 10002,
-    title: "✨ 신규 서비스 로고 시안 투표 (테스트)",
-    status: "투표 대기",
-    dDay: "D-5",
-    voters: 0,
-    options: [
-      { id: '1', text: 'A안 (모던하고 심플한 미니멀리즘 디자인)', voteCount: 0 },
-      { id: '2', text: 'B안 (전통과 신뢰를 강조한 클래식 디자인)', voteCount: 0 }
+      { id: '2-1', text: '안목해변 커피거리 정복 코스', voteCount: 2 },
+      { id: '2-1-1', text: '로컬 유명 로스팅 카페 바리스타 체험', voteCount: 2 }
     ]
   }
 ];
@@ -79,12 +71,9 @@ const BottomNav = ({ view, setView, showToast }) => (
 );
 
 // ==========================================
-// [VIEWS] 화면별 모듈
+// [VIEWS] 화면별 모듈 (1. 홈 화면)
 // ==========================================
-
-const HomeView = ({ setView, showToast, decisions, onSelectDecision }) => {
-  const [imgError, setImgError] = useState(false);
-
+const HomeView = ({ setView, showToast, decisions, onSelectId }) => {
   return (
     <>
       <header className="px-6 pt-6 pb-2 bg-white shrink-0">
@@ -93,15 +82,27 @@ const HomeView = ({ setView, showToast, decisions, onSelectDecision }) => {
       
       <main className="flex-1 px-6 pb-24 overflow-y-auto">
         <div className="flex justify-center mb-6 mt-2 h-24">
-          {!imgError ? (
-            <img src="/앱로고.jpg" alt="Logo" className="h-full w-auto object-contain mix-blend-multiply" onError={() => setImgError(true)} />
-          ) : (
-            <div className="h-full px-10 bg-gray-50 border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center text-gray-400 text-center">
-              <span className="text-xs font-black text-gray-500 mb-1">앱로고.jpg</span>
-              <span className="text-[10px] font-medium">업로드 필요</span>
-            </div>
-          )}
+          <img src="/앱로고.jpg" alt="Logo" className="h-full w-auto object-contain mix-blend-multiply" onError={(e) => e.target.style.display='none'} />
         </div>
+
+        {/* AI 자동 템플릿 영역 완벽 복구 */}
+        <section className="mb-8 relative">
+          <div className="absolute inset-0 border-[3px] border-[#a8ff35] rounded-3xl animate-pulse shadow-[0_0_20px_rgba(168,255,53,0.6)]"></div>
+          <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-5 border border-white">
+            <div className="flex items-center gap-1.5 mb-4">
+              <Zap className="w-4 h-4 text-[#8CB82D] fill-[#8CB82D]" />
+              <h2 className="text-[11px] font-black text-[#8CB82D] uppercase tracking-widest">AI Auto Templates</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {TEMPLATES.map((tpl) => (
+                <button key={tpl.id} onClick={() => showToast('준비중입니다. (추후 AI 자동생성 지원)')} className={`${tpl.bgColor} bg-opacity-60 p-3 rounded-xl flex items-center gap-3 active:scale-95 transition-all`}>
+                  <div className="p-1.5 bg-white rounded-lg shadow-sm shrink-0">{tpl.icon}</div>
+                  <span className="font-bold text-gray-800 text-[13px] truncate">{tpl.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <button onClick={() => setView('create')} className="w-full bg-gradient-to-br from-[#E8668A] to-[#F4A067] text-white rounded-2xl py-4 px-4 flex items-center justify-center gap-2 shadow-xl shadow-pink-100 mb-8 active:scale-[0.98] transition-transform">
           <PlusCircle className="w-6 h-6" />
@@ -117,8 +118,8 @@ const HomeView = ({ setView, showToast, decisions, onSelectDecision }) => {
             {decisions.map((item) => (
               <div 
                 key={item.id} 
-                onClick={() => onSelectDecision(item)} 
-                className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer active:scale-[0.99] animate-in fade-in slide-in-from-bottom-2 duration-300"
+                onClick={() => onSelectId(item.id)} 
+                className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow cursor-pointer active:scale-[0.99]"
               >
                 <div className="flex justify-between items-start mb-3">
                   <span className="bg-pink-50 text-[#E8668A] text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">{item.status}</span>
@@ -135,6 +136,9 @@ const HomeView = ({ setView, showToast, decisions, onSelectDecision }) => {
   );
 };
 
+// ==========================================
+// [VIEWS] 화면별 모듈 (2. 안건 생성 화면)
+// ==========================================
 const CreateView = ({ setView, onPublish }) => {
   const [title, setTitle] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -156,6 +160,7 @@ const CreateView = ({ setView, onPublish }) => {
       const depth = pId.split('-').length;
       if (depth >= MAX_DEPTH) return;
       const sibs = options.filter(o => o.id.startsWith(pId + '-') && o.id.split('-').length === depth + 1);
+      if (sibs.length >= MAX_CHILD_PER_NODE) return;
       newId = `${pId}-${(sibs.length > 0 ? Math.max(...sibs.map(o => parseInt(o.id.split('-').pop()))) : 0) + 1}`;
     }
     const newOpts = [...options, { id: newId, text: '', voteCount: 0 }].sort((a, b) => {
@@ -169,133 +174,182 @@ const CreateView = ({ setView, onPublish }) => {
     setOptions(newOpts);
   };
 
+  const rootNodesCount = options.filter(o => !o.id.includes('-')).length;
+
   return (
     <>
-      <header className="px-4 py-5 bg-white border-b border-gray-100 flex items-center shrink-0 z-10">
+      <header className="px-4 py-5 bg-white border-b border-gray-100 flex items-center shrink-0">
         <button onClick={() => setView('home')} className="p-2 hover:bg-gray-100 rounded-full"><ChevronLeft /></button>
         <h1 className="flex-1 text-center font-black text-lg mr-8">안건 만들기</h1>
       </header>
-      <main className="flex-1 px-6 pt-6 pb-40 overflow-y-auto relative bg-gray-50/30">
+      
+      <main className="flex-1 px-6 pt-6 pb-40 overflow-y-auto bg-gray-50/30">
         <div className="space-y-6">
           <div>
-            <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2">안건 제목</label>
+            <div className="flex justify-between items-end mb-2">
+              <label className="text-xs font-black text-gray-400 uppercase tracking-widest">안건 제목</label>
+              <span className={`text-[10px] font-black ${title.length >= 30 ? 'text-red-500' : 'text-gray-300'}`}>{title.length}/30</span>
+            </div>
             <input type="text" maxLength={30} value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="예: 이번 워크샵 어디로 갈까요?" className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-[#E8668A] outline-none font-bold text-gray-800 shadow-sm" />
           </div>
-          <div className="space-y-3">
-            <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2">선택지 구성</label>
-            {options.map((opt) => {
-              const depth = opt.id.split('-').length;
-              return (
-                <div key={opt.id} className="flex gap-2 items-center">
-                  {depth > 1 && <CornerDownRight className="w-4 h-4 text-gray-300 ml-2" />}
-                  <span className="font-black text-gray-400 text-[13px] shrink-0">{opt.id}</span>
-                  <input type="text" value={opt.text} onChange={(e)=>setOptions(options.map(o=>o.id===opt.id?{...o, text:e.target.value}:o))} placeholder="내용 입력" className="flex-1 px-4 py-3 rounded-xl border border-gray-100 text-sm font-bold" />
-                  {depth < MAX_DEPTH && (
-                    <button onClick={()=>addOption(opt.id)} className="px-2 py-1 bg-pink-50 text-[#E8668A] text-[10px] font-black rounded-lg">+하위</button>
-                  )}
-                  <button onClick={()=>setOptions(options.filter(o=>!(o.id===opt.id || o.id.startsWith(opt.id+'-'))))} className="text-gray-300 hover:text-red-400"><X className="w-4 h-4" /></button>
-                </div>
-              )
-            })}
-            <button onClick={()=>addOption(null)} className="w-full py-4 border-2 border-dashed border-orange-200 text-[#F4A067] font-black text-sm rounded-2xl">+ 선택지 추가</button>
+
+          <div>
+            <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-4">선택지 구성 (5-2-2 가이드 잠금)</label>
+            <div className="space-y-3">
+              {options.map((opt) => {
+                const depth = opt.id.split('-').length;
+                const childCount = options.filter(o => o.id.startsWith(opt.id + '-') && o.id.split('-').length === depth + 1).length;
+
+                return (
+                  <div key={opt.id} className="flex gap-2 items-center">
+                    {depth > 1 && <CornerDownRight className="w-4 h-4 text-gray-300 ml-2 animate-in fade-in" style={{marginLeft: (depth-1)*14+'px'}} />}
+                    <span className="font-black text-gray-400 text-[13px] shrink-0 min-w-[20px]">{opt.id}.</span>
+                    <input type="text" value={opt.text} onChange={(e)=>setOptions(options.map(o=>o.id===opt.id?{...o, text:e.target.value}:o))} placeholder="내용 입력" className="flex-1 px-4 py-3 rounded-xl border border-gray-100 text-sm font-bold focus:ring-1 focus:ring-[#E8668A] outline-none bg-white shadow-sm" />
+                    
+                    {depth < MAX_DEPTH && (
+                      <button 
+                        onClick={()=>addOption(opt.id)} 
+                        className={`px-2 py-1.5 rounded-lg text-[10px] font-black shrink-0 transition-all ${childCount >= MAX_CHILD_PER_NODE ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-pink-50 text-[#E8668A]'}`}
+                      >
+                        {childCount >= MAX_CHILD_PER_NODE ? '최대' : '+하위'}
+                      </button>
+                    )}
+                    <button onClick={()=>setOptions(options.filter(o=>!(o.id===opt.id || o.id.startsWith(opt.id+'-'))))} className="text-gray-300 hover:text-red-400 p-1"><X className="w-4 h-4" /></button>
+                  </div>
+                )
+              })}
+
+              <button 
+                onClick={()=>addOption(null)} 
+                className={`w-full py-4 border-2 border-dashed rounded-2xl font-black text-sm transition-all ${rootNodesCount >= MAX_ROOT_NODES ? 'border-gray-200 text-gray-300 cursor-not-allowed bg-gray-50' : 'border-orange-200 text-[#F4A067] hover:bg-orange-50'}`}
+              >
+                {rootNodesCount >= MAX_ROOT_NODES ? '부모 노드 생성 제한 (최대 5개)' : '+ 선택지 추가'}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-black text-gray-400 uppercase tracking-widest block mb-2">마감 기한 설정</label>
+            <input type="datetime-local" value={deadline} onChange={(e)=>setDeadline(e.target.value)} className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-[#E8668A] outline-none font-bold text-gray-700 shadow-sm bg-white" />
           </div>
         </div>
       </main>
-      <div className="absolute bottom-[76px] left-0 w-full px-6 pb-6 pt-10 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none z-10">
-        <button onClick={()=>{
-          if (options.filter(o=>o.text.trim()!=='').length < 2) return setShowError(true);
-          onPublish({ title, deadline, options: options.filter(o=>o.text.trim()!=='') });
-        }} className="w-full bg-gradient-to-r from-[#E8668A] to-[#F4A067] text-white rounded-2xl py-4 font-black shadow-xl pointer-events-auto">의견모으기 시작</button>
+
+      <div className="absolute bottom-[76px] left-0 w-full px-6 pb-6 pt-10 bg-gradient-to-t from-white via-white/90 to-transparent z-10 pointer-events-none">
+        <button 
+          onClick={()=>{
+            const filled = options.filter(o=>o.text.trim()!=='');
+            if (filled.length < 2) return setShowError(true);
+            onPublish({ title, options: filled });
+          }} 
+          className="w-full bg-gradient-to-r from-[#E8668A] to-[#F4A067] text-white rounded-2xl py-4 font-black shadow-xl pointer-events-auto active:scale-95 transition-all text-lg"
+        >
+          의견모으기 시작
+        </button>
       </div>
+
+      {/* 에러 모달 팝업 복구 */}
+      {showError && (
+        <div className="absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-8 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] p-8 w-full text-center shadow-2xl animate-in zoom-in duration-300">
+             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6"><AlertCircle className="w-10 h-10 text-red-400" /></div>
+             <h3 className="text-xl font-black text-gray-900 mb-3 tracking-tight">입력 내용을 확인해 주세요</h3>
+             <p className="text-sm text-gray-500 mb-8 font-medium leading-relaxed">최소 2개 이상의 유효한 선택지가 필요합니다.</p>
+             <button onClick={()=>setShowError(false)} className="w-full bg-gray-900 text-white rounded-2xl py-4 font-black active:scale-95 transition-all">다시 확인하기</button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
 
-// 3. VOTE VIEW (말줄임표 축약 및 선택 시 자동 확장 로직)
+// ==========================================
+// [VIEWS] 화면별 모듈 (3. 투표 참여 화면)
+// ==========================================
 const VoteView = ({ decision, setView, onVoteSubmit }) => {
   const [selectedParent, setSelectedParent] = useState(null);
-  const [selectedChild, setSelectedChild] = useState(null);
+  const [selectedL1, setSelectedL1] = useState(null);
+  const [selectedL2, setSelectedL2] = useState(null);
 
   const rootOptions = decision.options.filter(o => !o.id.includes('-'));
-
-  const handleParentSelect = (opt) => {
-    setSelectedParent(opt);
-    setSelectedChild(null); 
-  };
+  const getChildren = (parentId, depth) => decision.options.filter(o => o.id.startsWith(parentId + '-') && o.id.split('-').length === depth);
 
   const handleVote = () => {
-    const currentChildren = decision.options.filter(o => o.id.startsWith(selectedParent.id + '-') && o.id.split('-').length === 2);
-    const finalChoiceId = currentChildren.length > 0 && selectedChild ? selectedChild.id : selectedParent.id;
-    onVoteSubmit(decision.id, finalChoiceId);
-  };
-
-  const hasChildren = (parentId) => {
-    return decision.options.filter(o => o.id.startsWith(parentId + '-') && o.id.split('-').length === 2).length > 0;
+    const finalId = selectedL2?.id || selectedL1?.id || selectedParent?.id;
+    onVoteSubmit(decision.id, finalId);
   };
 
   return (
     <>
-      <header className="px-4 py-5 bg-white border-b border-gray-100 flex items-center shrink-0 z-10">
+      <header className="px-4 py-5 bg-white border-b border-gray-100 flex items-center shrink-0">
         <button onClick={() => setView('home')} className="p-2 hover:bg-gray-100 rounded-full"><ChevronLeft /></button>
         <h1 className="flex-1 text-center font-black text-lg mr-8 truncate px-2">{decision.title}</h1>
       </header>
+      
       <main className="flex-1 px-6 pt-6 pb-40 overflow-y-auto bg-gray-50/30">
-        <div className="mb-8">
-           <h2 className="text-xl font-black text-gray-900 mb-2">어디로 갈까요?</h2>
-           <p className="text-sm text-gray-400 font-medium">원하는 항목을 선택해 주세요.</p>
+        <div className="mb-6">
+          <h2 className="text-xl font-black text-gray-900 mb-1">어디로 갈까요?</h2>
+          <p className="text-sm text-gray-400 font-medium">원하는 항목을 차례대로 선택해 주세요.</p>
         </div>
 
         <div className="space-y-4">
-          {rootOptions.map((parentOpt) => {
-            const isSelectedParent = selectedParent?.id === parentOpt.id;
-            const childOptions = decision.options.filter(o => o.id.startsWith(parentOpt.id + '-') && o.id.split('-').length === 2);
-            
+          {rootOptions.map((parent) => {
+            const isSelP = selectedParent?.id === parent.id;
+            const l1Children = getChildren(parent.id, 2);
+
             return (
-              <div key={parentOpt.id} className="flex flex-col gap-2">
-                {/* 부모 노드 타일 */}
+              <div key={parent.id} className="flex flex-col gap-2">
+                {/* 부모 노드 */}
                 <button 
-                  onClick={() => handleParentSelect(parentOpt)}
-                  className={`w-full p-5 rounded-[24px] text-left transition-all duration-300 flex justify-between items-start border-2 ${
-                    isSelectedParent 
-                    ? 'bg-white border-[#B6FF33] shadow-[0_12px_24px_-8px_rgba(182,255,51,0.5)] z-10' 
-                    : 'bg-white border-transparent shadow-sm hover:border-gray-100'
-                  }`}
+                  onClick={() => {setSelectedParent(parent); setSelectedL1(null); setSelectedL2(null);}} 
+                  className={`w-full p-5 rounded-[24px] text-left transition-all border-2 flex justify-between items-start ${isSelP ? 'bg-white border-[#B6FF33] shadow-[0_12px_24px_-8px_rgba(182,255,51,0.5)] scale-[1.01]' : 'bg-white border-transparent shadow-sm'}`}
                 >
                   <div className="flex gap-2 flex-1 mr-2 overflow-hidden">
-                    <span className="text-[16px] font-black text-[#E8668A] shrink-0">{parentOpt.id}.</span>
-                    {/* 🔥 텍스트 축약 및 확장 로직 */}
-                    <span className={`text-[16px] font-black break-words ${isSelectedParent ? 'text-gray-900' : 'text-gray-500 truncate'}`}>
-                      {parentOpt.text}
-                    </span>
+                    <span className="text-[16px] font-black text-[#E8668A] shrink-0">{parent.id}.</span>
+                    <span className={`text-[16px] font-black break-words ${isSelP ? 'text-gray-900' : 'text-gray-500 truncate'}`}>{parent.text}</span>
                   </div>
-                  {isSelectedParent && <div className="w-6 h-6 bg-[#B6FF33] rounded-full flex items-center justify-center shrink-0 mt-0.5"><Check className="w-4 h-4 text-[#2C4000]" /></div>}
+                  {isSelP && <div className="w-6 h-6 bg-[#B6FF33] rounded-full flex items-center justify-center shrink-0 mt-0.5 animate-in zoom-in"><Check className="w-4 h-4 text-[#2C4000]" /></div>}
                 </button>
 
-                {/* 자식 노드 렌더링 */}
-                {isSelectedParent && childOptions.length > 0 && (
-                  <div className="pl-6 space-y-2 mt-1 animate-in slide-in-from-top-2 fade-in duration-300">
-                    {childOptions.map((childOpt) => (
+                {/* 자식 노드 1뎁스 */}
+                {isSelP && l1Children.map(l1 => {
+                  const isSelL1 = selectedL1?.id === l1.id;
+                  const l2Children = getChildren(l1.id, 3);
+                  
+                  return (
+                    <div key={l1.id} className="pl-6 space-y-2 animate-in slide-in-from-top-2 duration-200">
                       <button 
-                        key={childOpt.id}
-                        onClick={() => setSelectedChild(childOpt)}
-                        className={`w-full p-4 rounded-xl text-left transition-all flex items-start gap-3 border-2 ${
-                          selectedChild?.id === childOpt.id 
-                          ? 'bg-[#F9FFF0] border-[#B6FF33] text-[#2C4000]' 
-                          : 'bg-white border-gray-100 text-gray-500'
-                        }`}
+                        onClick={() => {setSelectedL1(l1); setSelectedL2(null);}} 
+                        className={`w-full p-4 rounded-xl text-left transition-all flex items-start gap-3 border-2 ${isSelL1 ? 'bg-[#F9FFF0] border-[#B6FF33] text-[#2C4000]' : 'bg-white border-gray-100 text-gray-500'}`}
                       >
                         <CornerDownRight className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" />
                         <div className="flex gap-2 flex-1 overflow-hidden">
-                          <span className="text-[14px] font-black text-[#F4A067] shrink-0">{childOpt.id}.</span>
-                          {/* 🔥 자식 텍스트 축약 및 확장 */}
-                          <span className={`text-[14px] font-bold break-words ${selectedChild?.id === childOpt.id ? '' : 'truncate'}`}>
-                            {childOpt.text}
-                          </span>
+                          <span className="text-[14px] font-black text-[#F4A067] shrink-0">{l1.id}.</span>
+                          <span className={`text-[14px] font-bold break-words ${isSelL1 ? '' : 'truncate'}`}>{l1.text}</span>
                         </div>
                       </button>
-                    ))}
-                  </div>
-                )}
+
+                      {/* 자식 노드 2뎁스 */}
+                      {isSelL1 && l2Children.map(l2 => {
+                        const isSelL2 = selectedL2?.id === l2.id;
+                        return (
+                          <button 
+                            key={l2.id} 
+                            onClick={() => setSelectedL2(l2)} 
+                            className={`w-full p-4 ml-6 rounded-xl text-left transition-all flex items-start gap-3 border-2 animate-in slide-in-from-top-1 ${isSelL2 ? 'bg-[#F9FFF0] border-[#B6FF33] text-[#2C4000]' : 'bg-white/50 border-gray-50 text-gray-400'}`} 
+                            style={{width: 'calc(100% - 24px)'}}
+                          >
+                            <CornerDownRight className="w-4 h-4 text-gray-200 shrink-0 mt-0.5" />
+                            <div className="flex gap-2 flex-1 overflow-hidden">
+                              <span className="text-[12px] font-black text-[#8CB82D] shrink-0">{l2.id}.</span>
+                              <span className={`text-[12px] font-bold break-words ${isSelL2 ? '' : 'truncate'}`}>{l2.text}</span>
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
             );
           })}
@@ -304,13 +358,9 @@ const VoteView = ({ decision, setView, onVoteSubmit }) => {
 
       <div className="absolute bottom-[76px] left-0 w-full px-6 pb-6 pt-10 bg-gradient-to-t from-white via-white/90 to-transparent z-10">
         <button 
-          disabled={!selectedParent || (hasChildren(selectedParent?.id) && !selectedChild)}
+          disabled={!selectedParent || (getChildren(selectedParent.id, 2).length > 0 && !selectedL1) || (selectedL1 && getChildren(selectedL1.id, 3).length > 0 && !selectedL2)}
           onClick={handleVote}
-          className={`w-full rounded-2xl py-4 font-black shadow-xl transition-all text-lg ${
-            (!selectedParent || (hasChildren(selectedParent?.id) && !selectedChild))
-            ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-            : 'bg-gradient-to-r from-[#E8668A] to-[#F4A067] text-white active:scale-95'
-          }`}
+          className={`w-full rounded-2xl py-4 font-black shadow-xl transition-all text-lg ${(!selectedParent || (getChildren(selectedParent.id, 2).length > 0 && !selectedL1) || (selectedL1 && getChildren(selectedL1.id, 3).length > 0 && !selectedL2)) ? 'bg-gray-100 text-gray-300 cursor-not-allowed' : 'bg-gradient-to-r from-[#E8668A] to-[#F4A067] text-white active:scale-95'}`}
         >
           투표 완료하기
         </button>
@@ -319,26 +369,42 @@ const VoteView = ({ decision, setView, onVoteSubmit }) => {
   );
 };
 
+// ==========================================
+// [VIEWS] 화면별 모듈 (4. 생성 완료 성공 화면)
+// ==========================================
 const SuccessView = ({ setView }) => (
   <main className="flex-1 px-8 flex flex-col items-center justify-center text-center pb-24">
-    <div className="w-24 h-24 bg-green-50 rounded-[40px] flex items-center justify-center mb-8"><CheckCircle2 className="w-14 h-14 text-green-400" /></div>
-    <h2 className="text-2xl font-black text-gray-900 mb-2">안건 생성 완료!</h2>
-    <button onClick={()=>setView('home')} className="mt-16 text-gray-400 font-black text-sm border-b-2 border-gray-100">홈으로 돌아가기</button>
+    <div className="w-24 h-24 bg-green-50 rounded-[40px] flex items-center justify-center mb-8 animate-bounce"><CheckCircle2 className="w-14 h-14 text-green-400" /></div>
+    <h2 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">안건 생성 완료!</h2>
+    <p className="text-sm text-gray-400 mb-12 font-medium">참여자들에게 링크를 공유하여<br/>의사결정을 시작해보세요.</p>
+    
+    {/* 관리 링크 및 공유 링크 레이아웃 완벽 복구 */}
+    <div className="w-full space-y-4">
+      <div className="bg-purple-50 p-5 rounded-3xl text-left border border-purple-100">
+        <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-2">방장 관리 링크</p>
+        <div className="flex justify-between items-center"><code className="text-xs text-purple-600 font-bold truncate mr-4">admin/df-2026-auth-8f3a</code><Copy className="w-5 h-5 text-purple-300 cursor-pointer" /></div>
+      </div>
+      <div className="bg-gray-50 p-5 rounded-3xl text-left border border-gray-100">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">참여자 공유 링크</p>
+        <div className="flex justify-between items-center"><code className="text-xs text-gray-500 font-bold truncate mr-4">vote/decision-flow-v1</code><Copy className="w-5 h-5 text-gray-300 cursor-pointer" /></div>
+      </div>
+    </div>
+    
+    <button onClick={()=>setView('home')} className="mt-16 text-gray-400 font-black text-sm border-b-2 border-gray-100 pb-1">홈으로 돌아가기</button>
   </main>
 );
 
+// ==========================================
+// [ROOT] 메인 앱 글로벌 컨테이너
+// ==========================================
 export default function App() {
   const [view, setView] = useState('home');
   const [toast, setToast] = useState(null);
-  const [selectedDecision, setSelectedDecision] = useState(null);
+  const [selectedDecisionId, setSelectedDecisionId] = useState(null);
   
   const [decisions, setDecisions] = useState(() => {
-    const savedData = localStorage.getItem('decisionFlow_decisions');
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      if (parsed.length > 0) return parsed;
-    }
-    return INITIAL_MOCK_DATA;
+    const saved = localStorage.getItem('decisionFlow_decisions');
+    return (saved && JSON.parse(saved).length > 0) ? JSON.parse(saved) : INITIAL_MOCK_DATA;
   });
 
   useEffect(() => {
@@ -364,20 +430,19 @@ export default function App() {
   };
 
   const handleVoteSubmit = (decisionId, optionId) => {
-    const updatedDecisions = decisions.map(d => {
+    const updated = decisions.map(d => {
       if (d.id === decisionId) {
-        const updatedOptions = d.options.map(o => {
-          if (o.id === optionId) return { ...o, voteCount: (o.voteCount || 0) + 1 };
-          return o;
-        });
-        return { ...d, voters: (d.voters || 0) + 1, options: updatedOptions };
+        const opts = d.options.map(o => o.id === optionId ? { ...o, voteCount: (o.voteCount || 0) + 1 } : o);
+        return { ...d, voters: (d.voters || 0) + 1, options: opts };
       }
       return d;
     });
-    setDecisions(updatedDecisions);
+    setDecisions(updated);
     showToast('투표가 반영되었습니다!');
     setView('home');
   };
+
+  const currentSelectedDecision = decisions.find(d => d.id === selectedDecisionId);
 
   return (
     <div className="min-h-screen bg-[#F8F9FB] flex justify-center items-center font-sans">
@@ -385,15 +450,15 @@ export default function App() {
         {view === 'home' && (
           <HomeView 
             setView={setView} 
-            showToast={showToast} 
+            showToast={showToast}
             decisions={decisions} 
-            onSelectDecision={(d) => { setSelectedDecision(d); setView('vote'); }} 
+            onSelectId={(id)=>{setSelectedDecisionId(id); setView('vote');}} 
           />
         )}
         {view === 'create' && <CreateView setView={setView} onPublish={handlePublish} />}
-        {view === 'vote' && selectedDecision && (
+        {view === 'vote' && currentSelectedDecision && (
           <VoteView 
-            decision={selectedDecision} 
+            decision={currentSelectedDecision} 
             setView={setView} 
             onVoteSubmit={handleVoteSubmit} 
           />
